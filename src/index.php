@@ -8,6 +8,7 @@ function dump($var) {
     echo '<pre>' . print_r($var, 1) . '</pre>';
 }
 
+/* DONE IN CSS
 function getTileImage($tile) {
     $tileTypes = [
         "brick" => "./images/brick.jpg",
@@ -19,6 +20,7 @@ function getTileImage($tile) {
 
     return $tileTypes[$tile] ?? null;
 }
+    */
 
 function generateTileBoard($boardData) {
     if (empty($boardData)) {
@@ -30,8 +32,7 @@ function generateTileBoard($boardData) {
     foreach ($boardData as $row) {
         $tileBoard .= '<tr>';
         foreach ($row as $tileName) {
-            $tile = getTileImage($tileName);
-            $tileBoard .= '<td><img src="' . $tile . '" alt="' . $tileName . '"></td>';
+            $tileBoard .= '<td><div class=' . $tileName . '></td>';
         }
         $tileBoard .= '</tr>';
     }
@@ -56,6 +57,7 @@ function getBoardData() {
 // Data
 $boardData = getBoardData();
 $outputBoard = generateTileBoard($boardData);
+
 ?>
 
 <!DOCTYPE html>
