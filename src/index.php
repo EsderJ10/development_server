@@ -22,17 +22,23 @@ function getTileImage($tile) {
 }
     */
 
-function generateTileBoard($boardData) {
+function generateTileBoard($boardData, $characterPosition, $characterName) {
     if (empty($boardData)) {
         return '<p>No board data found.</p>';
     }
 
     $tileBoard = '<table class="tileboard">';
-
+    $tileBoard .= '<tr>';
+    $counter = 0;
+    
     foreach ($boardData as $row) {
-        $tileBoard .= '<tr>';
         foreach ($row as $tileName) {
-            $tileBoard .= '<td><div class=' . $tileName . '></td>';
+            $counter++;
+            if ($counter == $characterPosition) {
+                $tileBoard .= '<td><div class=' . $tileName . '> <div class='. $characterName . '></td>';
+            } else {
+                $tileBoard .= '<td><div class=' . $tileName . '></td>';
+            }
         }
         $tileBoard .= '</tr>';
     }
@@ -54,9 +60,14 @@ function getBoardData($filePath) {
     return $boardData ?: null;
 }
 
+function setCharacterPosition() {
+    return rand(0, 143);
+}
+
 // Data
+$characterPosition = setCharacterPosition();
 $boardData = getBoardData("data/board.csv");
-$outputBoard = generateTileBoard($boardData);
+$outputBoard = generateTileBoard($boardData, $characterPosition, "frog");
 
 ?>
 

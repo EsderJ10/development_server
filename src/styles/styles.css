@@ -75,3 +75,8 @@ table.tileboard div {
     background: url("../images/stone.jpg");
     background-size: cover;
 }
+
+.frog {
+    background: url("../images/frog.png");
+    background-size: contain;
+}
