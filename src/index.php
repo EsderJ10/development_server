@@ -41,10 +41,10 @@ function generateTileBoard($boardData) {
     return $tileBoard;
 }
 
-function getBoardData() {
+function getBoardData($filePath) {
     $boardData = [];
     
-    if (($handle = fopen("data/board.csv", "r")) !== FALSE) {
+    if (($handle = fopen($filePath, "r")) !== FALSE) {
         while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
             $boardData[] = $data;
         }
@@ -55,7 +55,7 @@ function getBoardData() {
 }
 
 // Data
-$boardData = getBoardData();
+$boardData = getBoardData("data/board.csv");
 $outputBoard = generateTileBoard($boardData);
 
 ?>
