@@ -11,35 +11,49 @@ function getBoardData($filePath) {
     return $boardData ?: null;
 }
 
-function getBoardSize($boardData) {
+function getBoardDimensions($boardData) {
     if (empty($boardData)) {
-        return 0;
+        return ['rows' => 0, 'cols' => 0];
     }
-    return count($boardData) * count($boardData[0]);
+    return [
+        'rows' => count($boardData),
+        'cols' => count($boardData[0])
+    ];
 }
 
 // Characters
-function createCharacter($name, $class, $position = null, $boardSize = 144) {
+function createCharacter($name, $class, $position = null, $boardDimensions = null) {
+    $validPosition = null;
+    if ($position && $boardDimensions && isValidPosition($position, $boardDimensions)) {
+        $validPosition = $position;
+    }
+    
     return [
         'name' => $name,
         'class' => $class,
-        'position' => (int) $position
+        'position' => $validPosition
     ];
 }
 
 function findCharacterAtPosition($characters, $position) {
+    if (!$position || !is_array($position)) {
+        return null;
+    }
+    
     foreach ($characters as $character) {
-        if ($character['position'] === $position) {
+        if ($character['position'] && 
+            $character['position'][0] === $position[0] && 
+            $character['position'][1] === $position[1]) {
             return $character;
         }
     }
     return null;
 }
 
-function validateCharacterPositions($characters, $boardSize) {
+function validateCharacterPositions($characters, $boardDimensions) {
     $validCharacters = [];
     foreach ($characters as $character) {
-        if ($character['position'] >= 1 && $character['position'] <= $boardSize) {
+        if (isValidPosition($character['position'], $boardDimensions)) {
             $validCharacters[] = $character;
         }
     }
@@ -54,7 +68,7 @@ function initializeTileboard($boardFilePath) {
     }
     return [
         'board' => $boardData,
-        'board_size' => getBoardSize($boardData),
+        'board_dimensions' => getBoardDimensions($boardData),
         'characters' => []
     ];
 }
@@ -65,8 +79,39 @@ function addCharacterToBoard(&$boardData, $character) {
     }
 }
 
+function parsePosition($positionString) {
+    if (empty($positionString)) {
+        return null;
+    }
+    
+    if (strpos($positionString, ',') !== false) {
+        $parts = explode(',', $positionString);
+        if (count($parts) == 2) {
+            $row = (int)trim($parts[0]);
+            $col = (int)trim($parts[1]);
+            return [$row, $col];
+        }
+    }
+    
+    return null;
+}
 
-// Not used
-/*function generateRandomPosition($boardSize = 144) {
-    return rand(1, $boardSize);
-}*/
+function isValidPosition($position, $boardDimensions) {
+    if (!$position || !is_array($position) || count($position) != 2) {
+        return false;
+    }
+    
+    [$row, $col] = $position;
+    return $row >= 0 && $row < $boardDimensions['rows'] && 
+           $col >= 0 && $col < $boardDimensions['cols'];
+}
+
+// Not used (just for fun)
+/*
+function generateRandomPosition($boardDimensions) {
+    return [
+        rand(0, $boardDimensions['rows'] - 1),
+        rand(0, $boardDimensions['cols'] - 1)
+    ];
+}
+*/

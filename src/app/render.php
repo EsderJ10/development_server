@@ -5,27 +5,32 @@ function renderTileBoard($boardData, $characters = []) {
     if (empty($boardData)) {
         return '<p>No board data found.</p>';
     }
-
-    $boardSize = getBoardSize($boardData);
-    $validCharacters = validateCharacterPositions($characters, $boardSize);
-
+    
+    $boardDimensions = getBoardDimensions($boardData);
+    $validCharacters = validateCharacterPositions($characters, $boardDimensions);
+    
     $html = '<div class="tileboard">';
-    $position = 0;
-
-    foreach ($boardData as $row) {
-        foreach ($row as $tileName) {
-            $position++;
-            $character = findCharacterAtPosition($validCharacters, $position);
-            $html .= renderTile($tileName, $character);
+    
+    for ($row = 0; $row < $boardDimensions['rows']; $row++) {
+        for ($col = 0; $col < $boardDimensions['cols']; $col++) {
+            $tileName = $boardData[$row][$col];
+            $currentPosition = [$row, $col];
+            $character = findCharacterAtPosition($validCharacters, $currentPosition);
+            $html .= renderTile($tileName, $character, $currentPosition);
         }
     }
-
+    
     $html .= '</div>';
     return $html;
 }
 
-function renderTile($tileName, $character = null) {
-    $html = '<div class="tile ' . htmlspecialchars($tileName) . '">';
+function renderTile($tileName, $character = null, $position = null) {
+    $positionClass = '';
+    if ($position) {
+        $positionClass = ' position-' . $position[0] . '-' . $position[1];
+    }
+    
+    $html = '<div class="tile ' . htmlspecialchars($tileName) . $positionClass . '">';
     if ($character) {
         $html .= renderCharacter($character);
     }
