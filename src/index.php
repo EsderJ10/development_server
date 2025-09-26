@@ -10,16 +10,16 @@ require_once "./app/render.php";
 $tileboard = initializeTileboard("data/board.csv");
 
 if ($tileboard) {
-    $outputBoard = '';
+    $errorMessage = '';
     $frog = createCharacter("Frog", "frog", $_GET['characterPosition'] ,$tileboard['board_size']);
     if ($frog['position'] == null) {
-        $outputBoard .= '<p> ERROR: Character position is not valid </p>';
+        $errorMessage .= '<p> ERROR: Character position is not valid </p>';
     } else {
         addCharacterToBoard($tileboard, $frog);
     }
-    $outputBoard .= renderBoard($tileboard);
+    $outputBoard = renderBoard($tileboard);
 } else {
-    $outputBoard .= '<p>Error loading tileboard.</p>';
+    $outputBoard = '<p>Error loading tileboard.</p>';
 }
 ?>
 
@@ -33,6 +33,9 @@ if ($tileboard) {
 </head>
 <body>
     <h1>Tile Board</h1>
-    <?php echo $outputBoard; ?>
+    <?php 
+    echo $errorMessage;
+    echo $outputBoard;
+    ?>
 </body>
 </html>
