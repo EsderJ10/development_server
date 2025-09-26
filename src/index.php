@@ -10,7 +10,7 @@ require_once "./app/render.php";
 $tileboard = initializeTileboard("data/board.csv");
 
 if ($tileboard) {
-    $frog = createCharacter("Frog", "frog", null ,$tileboard['board_size']);
+    $frog = createCharacter("Frog", "frog", $_GET['characterPosition'] ,$tileboard['board_size']);
     addCharacterToBoard($tileboard, $frog);
 
     $outputBoard = renderBoard($tileboard);

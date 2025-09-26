@@ -23,12 +23,8 @@ function createCharacter($name, $class, $position = null, $boardSize = 144) {
     return [
         'name' => $name,
         'class' => $class,
-        'position' => $position ?? rand(1, $boardSize)
+        'position' => (int) $position
     ];
-}
-
-function generateRandomPosition($boardSize = 144) {
-    return rand(1, $boardSize);
 }
 
 function findCharacterAtPosition($characters, $position) {
@@ -68,3 +64,9 @@ function addCharacterToBoard(&$boardData, $character) {
         $boardData['characters'][] = $character;
     }
 }
+
+
+// Not used
+/*function generateRandomPosition($boardSize = 144) {
+    return rand(1, $boardSize);
+}*/
