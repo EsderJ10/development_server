@@ -16,7 +16,7 @@ function renderTileBoard($boardData, $characters = []) {
             $tileName = $boardData[$row][$col];
             $currentPosition = [$row, $col];
             $character = findCharacterAtPosition($validCharacters, $currentPosition);
-            $html .= renderTile($tileName, $character, $currentPosition);
+            $html .= renderTile($tileName, $character);
         }
     }
     
@@ -24,13 +24,9 @@ function renderTileBoard($boardData, $characters = []) {
     return $html;
 }
 
-function renderTile($tileName, $character = null, $position = null) {
-    $positionClass = '';
-    if ($position) {
-        $positionClass = ' position-' . $position[0] . '-' . $position[1];
-    }
+function renderTile($tileName, $character = null) {
     
-    $html = '<div class="tile ' . htmlspecialchars($tileName) . $positionClass . '">';
+    $html = '<div class="tile ' . htmlspecialchars($tileName) . '">';
     if ($character) {
         $html .= renderCharacter($character);
     }
