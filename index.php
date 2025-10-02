@@ -48,29 +48,46 @@ function leerArchivoCSV($rutaArchivoCSV) {
     return $tablero;
 }
 function leerInput(){
-    
     $col = filter_input(INPUT_GET, 'col', FILTER_VALIDATE_INT);
     $row = filter_input(INPUT_GET, 'row', FILTER_VALIDATE_INT);
 
-    return ((isset($col) && is_numeric($col)) && (isset($row) && is_numeric($row))) ? array(
+    if ($row === null || $row === false || $col === null || $col === false) {
+        return [
+            'pos' => null,
+            'message' => '<pre style="color:red; text-wrap: wrap;">* ERROR: Parámetros "row" y/o "col" no declarados o inválidos</pre>'
+        ];
+    }
+
+    if ($row < 0 || $row > 11 || $col < 0 || $col > 11) {
+        return [
+            'pos' => null,
+            'message' => '<pre style="color:red; text-wrap: wrap;">* ERROR: La posición del personaje está fuera de los límites del tablero</pre>'
+        ];
+    }
+
+    return [
+        'pos' => [
             'row' => $row,
             'col' => $col
-        ) : null;    
+        ],
+        'message' => ''
+    ];
 }
+
 
 function moveCharacter($direction, $row, $col) {
     switch ($direction) {
         case 'up':    
-            $row--; 
+            if ($row > 0) $row--; 
             break;
         case 'down':  
-            $row++; 
+            if ($row < 11) $row++; 
             break;
         case 'left':  
-            $col--; 
+            if ($col > 0) $col--; 
             break;
         case 'right': 
-            $col++; 
+            if ($col < 11) $col++; 
             break;
     }
     return "<a href=\"index.php?row={$row}&col={$col}\">" . strtoupper($direction) . "</a>";
@@ -81,22 +98,15 @@ function moveCharacter($direction, $row, $col) {
 //Extracción de las variables de la petición
 
 
-$posPersonaje = leerInput();
+$input = leerInput();
+$posPersonaje = $input['pos'];
+$message = $input['message'];
 $tablero = leerArchivoCSV('./data/tablero1.csv');
 
 
 
 //*****+++Lógica de presentación*******
 $tableroMarkup = getTableroMarkup($tablero, $posPersonaje);
-$message = '';
-
-if ($posPersonaje === null) {
-    $message = '<pre style="color:red; text-wrap: wrap;">* ERROR: Parámetros "row" y/o "col" no declarados o inválidos</pre>';
-} elseif ($posPersonaje['row'] < 0 || $posPersonaje['row'] > 11 
-       || $posPersonaje['col'] < 0 || $posPersonaje['col'] > 11) {
-    $message = '<pre style="color:red; text-wrap: wrap;">* ERROR: La posición del personaje está fuera de los límites del tablero</pre>';
-}
-
 
 ?>
 <!DOCTYPE html>
