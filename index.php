@@ -15,12 +15,15 @@ function dump($var){
 //*******Función lógica presentación**********+
 function getTableroMarkup ($tablero, $posPersonaje){
     $output = '';
+
     foreach ($tablero as $filaIndex => $datosFila) {
         foreach ($datosFila as $columnaIndex => $tileType) {
-            if(isset($posPersonaje)&&($filaIndex == $posPersonaje['row'])&&($columnaIndex == $posPersonaje['col'])){
-                $output .= '<div class = "tile ' . $tileType . '"><img src="./src/super_musculitos.png"></div>';    
-            }else{
-                $output .= '<div class = "tile ' . $tileType . '"></div>';
+            if ($posPersonaje !== null 
+                && $filaIndex === $posPersonaje['row'] 
+                && $columnaIndex === $posPersonaje['col']) {
+                $output .= '<div class="tile ' . $tileType . '"><img class="characters" src="./src/super_musculitos.png"></div>';    
+            } else {
+                $output .= '<div class="tile ' . $tileType . '"></div>';
             }
         }
     }
@@ -49,25 +52,50 @@ function leerInput(){
     $col = filter_input(INPUT_GET, 'col', FILTER_VALIDATE_INT);
     $row = filter_input(INPUT_GET, 'row', FILTER_VALIDATE_INT);
 
-    return (isset($col) && isset($row))? array(
+    return ((isset($col) && is_numeric($col)) && (isset($row) && is_numeric($row))) ? array(
             'row' => $row,
             'col' => $col
         ) : null;    
 }
+
+function moveCharacter($direction, $row, $col) {
+    switch ($direction) {
+        case 'up':    
+            $row--; 
+            break;
+        case 'down':  
+            $row++; 
+            break;
+        case 'left':  
+            $col--; 
+            break;
+        case 'right': 
+            $col++; 
+            break;
+    }
+    return "<a href=\"index.php?row={$row}&col={$col}\">" . strtoupper($direction) . "</a>";
+}
+
+
 //*****Lógica de negocio***********
 //Extracción de las variables de la petición
 
 
 $posPersonaje = leerInput();
-
-dump('$posPersonaje');
-dump($posPersonaje);
 $tablero = leerArchivoCSV('./data/tablero1.csv');
 
 
 
 //*****+++Lógica de presentación*******
 $tableroMarkup = getTableroMarkup($tablero, $posPersonaje);
+$message = '';
+
+if ($posPersonaje === null) {
+    $message = '<pre style="color:red; text-wrap: wrap;">* ERROR: Parámetros "row" y/o "col" no declarados o inválidos</pre>';
+} elseif ($posPersonaje['row'] < 0 || $posPersonaje['row'] > 11 
+       || $posPersonaje['col'] < 0 || $posPersonaje['col'] > 11) {
+    $message = '<pre style="color:red; text-wrap: wrap;">* ERROR: La posición del personaje está fuera de los límites del tablero</pre>';
+}
 
 
 ?>
@@ -118,12 +146,66 @@ $tableroMarkup = getTableroMarkup($tablero, $posPersonaje);
             background-color: green;
             background-position: 0px 0px;
         }
+
+        .container-controls {
+            margin-top: 20px;
+        }
+        .container-controls a {
+            display: inline-block;
+            margin-right: 10px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            width: 120px;
+        }
+        .container-controls a:hover {
+            background-color: #0056b3;
+        }
+        
+        .upper-row {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .bottom-row {
+            text-align: center;
+        }
+
+        .characters {
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
     </style>
 </head>
 <body>
     <h1>Tablero juego super rol DWES</h1>
+    <?php echo $message; ?>
     <div class="contenedorTablero">
         <?php echo $tableroMarkup; ?>
+    </div>
+
+    <div class="container-controls">
+        <div class="upper-row">
+            <?= moveCharacter('up', $posPersonaje['row'] ?? 0, $posPersonaje['col'] ?? 0) ?>
+        </div>
+        <div class="bottom-row">
+            <?= moveCharacter('left', $posPersonaje['row'] ?? 0, $posPersonaje['col'] ?? 0) ?>
+            <?= moveCharacter('down', $posPersonaje['row'] ?? 0, $posPersonaje['col'] ?? 0) ?>
+            <?= moveCharacter('right', $posPersonaje['row'] ?? 0, $posPersonaje['col'] ?? 0) ?>
+        </div>
     </div>
 </body>
 </html>
