@@ -88,8 +88,8 @@ function getMensajes($posPersonaje) {
     if (is_null($posPersonaje)) {
         array_push($mensajes, "* ERROR: Posición del personaje no declarada.");
     } 
-    else if ($posPersonaje['row'] < 0 && $posPersonaje['row'] > 11 &&
-            $posPersonaje['col'] < 0 && $posPersonaje['col'] > 11) {
+    else if ($posPersonaje['row'] < 0 || $posPersonaje['row'] > 11 ||
+            $posPersonaje['col'] < 0 || $posPersonaje['col'] > 11) {
         array_push($mensajes, "* ERROR: Posición del personaje inválida.");
     }
     
@@ -97,7 +97,7 @@ function getMensajes($posPersonaje) {
 }
 
 function getControles($posPersonaje) {
-
+    $controles = array();
     if (!is_null($posPersonaje) && 
         $posPersonaje['row'] >= 0 && $posPersonaje['row'] <= 11 &&
         $posPersonaje['col'] >= 0 && $posPersonaje['col'] <= 11) {
