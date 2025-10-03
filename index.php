@@ -40,21 +40,15 @@ function getMensajesMarkup($mensajes) {
     return $output;
 }
 
-function getControlesMarkup($posPersonaje) {
+function getControlesMarkup($controles) {
     $output = '';
-    $directions = ['up', 'down', 'left', 'right'];
-    $row = $posPersonaje['row'];
-    $col = $posPersonaje['col'];
 
-    $output .= '<div class="upper-row">';
-    $output .= '<a href="index.php?row=' . ($row - 1 >= 0 ? $row - 1 : 11) . '&col=' . $col . '">UP</a>';
-    $output .= '</div>';
+    if (isset($controles)) {
+        foreach ($controles as $direccion => $posicion) {
+            $output .= '<a href="?row=' . $posicion['row'] . '&col=' . $posicion['col'] . '">' . strtoupper($direccion) . '</a>';
+        }
+    }
 
-    $output .= '<div class="bottom-row">';
-    $output .= '<a href="index.php?row=' . $row . '&col=' . ($col - 1 >= 0 ? $col - 1 : 11) . '">LEFT</a>';
-    $output .= '<a href="index.php?row=' . ($row + 1 <= 11 ? $row + 1 : 0) . '&col=' . $col . '">DOWN</a>';
-    $output .= '<a href="index.php?row=' . $row . '&col=' . ($col + 1 <= 11 ? $col + 1 : 0) . '">RIGHT</a>';
-    $output .= '</div>';
     return $output;
 }
 
@@ -94,15 +88,41 @@ function getMensajes($posPersonaje) {
     if (is_null($posPersonaje)) {
         array_push($mensajes, "* ERROR: Posición del personaje no declarada.");
     } 
-    else if ($posPersonaje['row'] < 0 || $posPersonaje['row'] > 11 ||
-            $posPersonaje['col'] < 0 || $posPersonaje['col'] > 11) {
+    else if ($posPersonaje['row'] < 0 && $posPersonaje['row'] > 11 &&
+            $posPersonaje['col'] < 0 && $posPersonaje['col'] > 11) {
         array_push($mensajes, "* ERROR: Posición del personaje inválida.");
     }
     
     return $mensajes;
 }
 
+function getControles($posPersonaje) {
 
+    if (!is_null($posPersonaje) && 
+        $posPersonaje['row'] >= 0 && $posPersonaje['row'] <= 11 &&
+        $posPersonaje['col'] >= 0 && $posPersonaje['col'] <= 11) {
+            $controles = array(
+                'up' => array(
+                    'row' => max(0, $posPersonaje['row'] - 1),
+                    'col' => $posPersonaje['col']
+                ),
+                'down' => array(
+                    'row' => min(11, $posPersonaje['row'] + 1),
+                    'col' => $posPersonaje['col']
+                ),
+                'left' => array(
+                    'row' => $posPersonaje['row'],
+                    'col' => max(0, $posPersonaje['col'] - 1)
+                ),
+                'right' => array(
+                    'row' => $posPersonaje['row'],
+                    'col' => min(11, $posPersonaje['col'] + 1)
+                )
+            );
+    }
+
+    return $controles;
+}
 
 //*****Lógica de negocio***********
 //Extracción de las variables de la petición
@@ -110,6 +130,7 @@ function getMensajes($posPersonaje) {
 
 $posPersonaje = leerInput();
 $mensajes = getMensajes($posPersonaje);
+$controles = getControles($posPersonaje);
 $tablero = leerArchivoCSV('./data/tablero1.csv');
 
 
@@ -117,7 +138,7 @@ $tablero = leerArchivoCSV('./data/tablero1.csv');
 //*****+++Lógica de presentación*******
 $tableroMarkup = getTableroMarkup($tablero, $posPersonaje);
 $mensajeMarkup = getMensajesMarkup($mensajes);
-$controlesMarkup = getControlesMarkup($posPersonaje);
+$controlesMarkup = getControlesMarkup($controles);
 
 ?>
 <!DOCTYPE html>
@@ -169,7 +190,8 @@ $controlesMarkup = getControlesMarkup($posPersonaje);
         }
 
         .container-controls {
-            margin-top: 20px;
+            margin: 20px;
+            justify-content: center;
         }
         .container-controls a {
             display: inline-block;
@@ -181,17 +203,10 @@ $controlesMarkup = getControlesMarkup($posPersonaje);
             border-radius: 5px;
             font-weight: bold;
             width: 120px;
+            text-align: center;
         }
         .container-controls a:hover {
             background-color: #0056b3;
-        }
-        
-        .upper-row {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        .bottom-row {
-            text-align: center;
         }
 
         .characters {
