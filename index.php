@@ -29,6 +29,36 @@ function getTableroMarkup ($tablero, $posPersonaje){
     }
     return $output;
 }
+
+function getMensajesMarkup($mensajes) {
+    $output = '';
+
+    foreach($mensajes as $mensaje) {
+        $output .= '<pre>' . $mensaje . '</pre>';
+    }
+
+    return $output;
+}
+
+function getControlesMarkup($posPersonaje) {
+    $output = '';
+    $directions = ['up', 'down', 'left', 'right'];
+    $row = $posPersonaje['row'];
+    $col = $posPersonaje['col'];
+
+    $output .= '<div class="upper-row">';
+    $output .= '<a href="index.php?row=' . ($row - 1 >= 0 ? $row - 1 : 11) . '&col=' . $col . '">UP</a>';
+    $output .= '</div>';
+
+    $output .= '<div class="bottom-row">';
+    $output .= '<a href="index.php?row=' . $row . '&col=' . ($col - 1 >= 0 ? $col - 1 : 11) . '">LEFT</a>';
+    $output .= '<a href="index.php?row=' . ($row + 1 <= 11 ? $row + 1 : 0) . '&col=' . $col . '">DOWN</a>';
+    $output .= '<a href="index.php?row=' . $row . '&col=' . ($col + 1 <= 11 ? $col + 1 : 0) . '">RIGHT</a>';
+    $output .= '</div>';
+    return $output;
+}
+
+
 //******+Función Lógica de negocio************
 //El tablero es un array bidimensional en el que cada fila contiene 12 palabras cuyos valores pueden ser:
 // agua
@@ -51,62 +81,43 @@ function leerInput(){
     $col = filter_input(INPUT_GET, 'col', FILTER_VALIDATE_INT);
     $row = filter_input(INPUT_GET, 'row', FILTER_VALIDATE_INT);
 
-    if ($row === null || $row === false || $col === null || $col === false) {
-        return [
-            'pos' => null,
-            'message' => '<pre style="color:red; text-wrap: wrap;">* ERROR: Parámetros "row" y/o "col" no declarados o inválidos</pre>'
-        ];
-    }
-
-    if ($row < 0 || $row > 11 || $col < 0 || $col > 11) {
-        return [
-            'pos' => null,
-            'message' => '<pre style="color:red; text-wrap: wrap;">* ERROR: La posición del personaje está fuera de los límites del tablero</pre>'
-        ];
-    }
-
-    return [
-        'pos' => [
+    
+    return (isset($col) && is_int($col) && isset($row) && is_int($row))? array(
             'row' => $row,
             'col' => $col
-        ],
-        'message' => ''
-    ];
+        ) : null;  
 }
 
+function getMensajes($posPersonaje) {
+    $mensajes = array();
 
-function moveCharacter($direction, $row, $col) {
-    switch ($direction) {
-        case 'up':    
-            if ($row > 0) $row--; 
-            break;
-        case 'down':  
-            if ($row < 11) $row++; 
-            break;
-        case 'left':  
-            if ($col > 0) $col--; 
-            break;
-        case 'right': 
-            if ($col < 11) $col++; 
-            break;
+    if (is_null($posPersonaje)) {
+        array_push($mensajes, "* ERROR: Posición del personaje no declarada.");
+    } 
+    else if ($posPersonaje['row'] < 0 || $posPersonaje['row'] > 11 ||
+            $posPersonaje['col'] < 0 || $posPersonaje['col'] > 11) {
+        array_push($mensajes, "* ERROR: Posición del personaje inválida.");
     }
-    return "<a href=\"index.php?row={$row}&col={$col}\">" . strtoupper($direction) . "</a>";
+    
+    return $mensajes;
 }
+
 
 
 //*****Lógica de negocio***********
 //Extracción de las variables de la petición
 
 
-$input = leerInput();
-$posPersonaje = $input['pos'];
-$message = $input['message'];
+$posPersonaje = leerInput();
+$mensajes = getMensajes($posPersonaje);
 $tablero = leerArchivoCSV('./data/tablero1.csv');
 
 
 
 //*****+++Lógica de presentación*******
 $tableroMarkup = getTableroMarkup($tablero, $posPersonaje);
+$mensajeMarkup = getMensajesMarkup($mensajes);
+$controlesMarkup = getControlesMarkup($posPersonaje);
 
 ?>
 <!DOCTYPE html>
@@ -202,20 +213,13 @@ $tableroMarkup = getTableroMarkup($tablero, $posPersonaje);
 </head>
 <body>
     <h1>Tablero juego super rol DWES</h1>
-    <?php echo $message; ?>
+    <?php echo $mensajeMarkup; ?>
     <div class="contenedorTablero">
         <?php echo $tableroMarkup; ?>
     </div>
 
     <div class="container-controls">
-        <div class="upper-row">
-            <?= moveCharacter('up', $posPersonaje['row'] ?? 0, $posPersonaje['col'] ?? 0) ?>
-        </div>
-        <div class="bottom-row">
-            <?= moveCharacter('left', $posPersonaje['row'] ?? 0, $posPersonaje['col'] ?? 0) ?>
-            <?= moveCharacter('down', $posPersonaje['row'] ?? 0, $posPersonaje['col'] ?? 0) ?>
-            <?= moveCharacter('right', $posPersonaje['row'] ?? 0, $posPersonaje['col'] ?? 0) ?>
-        </div>
+        <?php echo $controlesMarkup; ?>
     </div>
 </body>
 </html>
