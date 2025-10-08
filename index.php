@@ -5,140 +5,19 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+include('./lib/funciones.php');
 
-/* Zona de declaración de funciones */
-//*******Funciones de debugueo****
-function dump($var){
-    echo '<pre>'.print_r($var,1).'</pre>';
-}
-
-//*******Función lógica presentación**********+
-function getTableroMarkup ($tablero, $posPersonaje){
-    $output = '';
-
-    foreach ($tablero as $filaIndex => $datosFila) {
-        foreach ($datosFila as $columnaIndex => $tileType) {
-            if ($posPersonaje !== null 
-                && $filaIndex === $posPersonaje['row'] 
-                && $columnaIndex === $posPersonaje['col']) {
-                $output .= '<div class="tile ' . $tileType . '"><img class="characters" src="./src/super_musculitos.png"></div>';    
-            } else {
-                $output .= '<div class="tile ' . $tileType . '"></div>';
-            }
-        }
-    }
-    return $output;
-}
-
-function getMensajesMarkup($mensajes) {
-    $output = '';
-
-    foreach($mensajes as $mensaje) {
-        $output .= '<pre>' . $mensaje . '</pre>';
-    }
-
-    return $output;
-}
-
-function getControlesMarkup($controles) {
-    $output = '';
-
-    if (isset($controles)) {
-        foreach ($controles as $direccion => $posicion) {
-            $output .= '<a href="?row=' . $posicion['row'] . '&col=' . $posicion['col'] . '">' . strtoupper($direccion) . '</a>';
-        }
-    }
-
-    return $output;
-}
-
-
-//******+Función Lógica de negocio************
-//El tablero es un array bidimensional en el que cada fila contiene 12 palabras cuyos valores pueden ser:
-// agua
-//fuego
-//tierra
-// hierba
-function leerArchivoCSV($rutaArchivoCSV) {
-    $tablero = [];
-
-    if (($puntero = fopen($rutaArchivoCSV, "r")) !== FALSE) {
-        while (($datosFila = fgetcsv($puntero)) !== FALSE) {
-            $tablero[] = $datosFila;
-        }
-        fclose($puntero);
-    }
-
-    return $tablero;
-}
-function leerInput(){
-    $col = filter_input(INPUT_GET, 'col', FILTER_VALIDATE_INT);
-    $row = filter_input(INPUT_GET, 'row', FILTER_VALIDATE_INT);
-
-    
-    return (isset($col) && is_int($col) && isset($row) && is_int($row))? array(
-            'row' => $row,
-            'col' => $col
-        ) : null;  
-}
-
-function getMensajes($posPersonaje) {
-    $mensajes = array();
-
-    if (is_null($posPersonaje)) {
-        array_push($mensajes, "* ERROR: Posición del personaje no declarada.");
-    } 
-    else if ($posPersonaje['row'] < 0 || $posPersonaje['row'] > 11 ||
-            $posPersonaje['col'] < 0 || $posPersonaje['col'] > 11) {
-        array_push($mensajes, "* ERROR: Posición del personaje inválida.");
-    }
-    
-    return $mensajes;
-}
-
-function getControles($posPersonaje) {
-    $controles = array();
-    if (!is_null($posPersonaje) && 
-        $posPersonaje['row'] >= 0 && $posPersonaje['row'] <= 11 &&
-        $posPersonaje['col'] >= 0 && $posPersonaje['col'] <= 11) {
-            $controles = array(
-                'up' => array(
-                    'row' => max(0, $posPersonaje['row'] - 1),
-                    'col' => $posPersonaje['col']
-                ),
-                'down' => array(
-                    'row' => min(11, $posPersonaje['row'] + 1),
-                    'col' => $posPersonaje['col']
-                ),
-                'left' => array(
-                    'row' => $posPersonaje['row'],
-                    'col' => max(0, $posPersonaje['col'] - 1)
-                ),
-                'right' => array(
-                    'row' => $posPersonaje['row'],
-                    'col' => min(11, $posPersonaje['col'] + 1)
-                )
-            );
-    }
-
-    return $controles;
-}
-
-//*****Lógica de negocio***********
-//Extracción de las variables de la petición
-
-
+processRedirect();
 $posPersonaje = leerInput();
-$mensajes = getMensajes($posPersonaje);
-$controles = getControles($posPersonaje);
+$arrows = getArrows($posPersonaje);
 $tablero = leerArchivoCSV('./data/tablero1.csv');
-
+$mensajes =  getMensajes($posPersonaje);
 
 
 //*****+++Lógica de presentación*******
 $tableroMarkup = getTableroMarkup($tablero, $posPersonaje);
-$mensajeMarkup = getMensajesMarkup($mensajes);
-$controlesMarkup = getControlesMarkup($controles);
+$mensajesUsuarioMarkup = getMensajesMarkup($mensajes);
+$arrowsMarkup = getArrowsMarkup($arrows);
 
 ?>
 <!DOCTYPE html>
@@ -148,7 +27,7 @@ $controlesMarkup = getControlesMarkup($controles);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Minified version -->
     <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
-    <title>Document</title>
+    <title>Tablero</title>
     <style>
         .contenedorTablero {
             width:600px;
@@ -189,11 +68,11 @@ $controlesMarkup = getControlesMarkup($controles);
             background-position: 0px 0px;
         }
 
-        .container-controls {
+        .arrowsContainer {
             margin: 20px;
             justify-content: center;
         }
-        .container-controls a {
+        .arrowsContainer a {
             display: inline-block;
             margin-right: 10px;
             padding: 10px 20px;
@@ -205,7 +84,7 @@ $controlesMarkup = getControlesMarkup($controles);
             width: 120px;
             text-align: center;
         }
-        .container-controls a:hover {
+        .arrowsContainer a:hover {
             background-color: #0056b3;
         }
 
@@ -228,13 +107,13 @@ $controlesMarkup = getControlesMarkup($controles);
 </head>
 <body>
     <h1>Tablero juego super rol DWES</h1>
-    <?php echo $mensajeMarkup; ?>
+    <div class="arrowsContainer">
+        <?php echo $arrowsMarkup; ?>
+    </div>
+    <div class="mensajesContainer"><?php echo $mensajesUsuarioMarkup; ?></div>
     <div class="contenedorTablero">
         <?php echo $tableroMarkup; ?>
     </div>
-
-    <div class="container-controls">
-        <?php echo $controlesMarkup; ?>
-    </div>
+    
 </body>
 </html>
