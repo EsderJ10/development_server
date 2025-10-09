@@ -2,64 +2,28 @@
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+require_once "./app/logic.php";
+require_once "./app/render.php";
 
-// Logic Functions
-function dump($var) {
-    echo '<pre>' . print_r($var, 1) . '</pre>';
-}
-
-/* DONE IN CSS
-function getTileImage($tile) {
-    $tileTypes = [
-        "brick" => "./images/brick.jpg",
-        "dirt" => "./images/dirt.jpg",
-        "ice" => "./images/ice.jpg",
-        "sand" => "./images/sand.jpg",
-        "stone" => "./images/stone.jpg"
-    ];
-
-    return $tileTypes[$tile] ?? null;
-}
-    */
-
-function generateTileBoard($boardData) {
-    if (empty($boardData)) {
-        return '<p>No board data found.</p>';
-    }
-
-    $tileBoard = '<table class="tileboard">';
-
-    foreach ($boardData as $row) {
-        $tileBoard .= '<tr>';
-        foreach ($row as $tileName) {
-            $tileBoard .= '<td><div class=' . $tileName . '></td>';
-        }
-        $tileBoard .= '</tr>';
-    }
-
-    $tileBoard .= '</table>';
-    return $tileBoard;
-}
-
-function getBoardData($filePath) {
-    $boardData = [];
+// Main execution
+$tileboard = initializeTileboard("data/board.csv");
+if ($tileboard) {
+    $message = '';
     
-    if (($handle = fopen($filePath, "r")) !== FALSE) {
-        while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-            $boardData[] = $data;
-        }
-        fclose($handle);
-    }
+    $positionInput = $_GET['characterPosition'] ?? '';
+    $position = parsePosition($positionInput);
     
-    return $boardData ?: null;
+    $frog = createCharacter("Frog", "frog", $position, $tileboard['board_dimensions']);
+    if ($frog['position'] == null) {
+        $message .= '<p> ERROR: Character position is not valid </p>';
+    } else {
+        addCharacterToBoard($tileboard, $frog);
+    }
+    $outputBoard = renderBoard($tileboard);
+} else {
+    $outputBoard = '<p>Error loading tileboard.</p>';
 }
-
-// Data
-$boardData = getBoardData("data/board.csv");
-$outputBoard = generateTileBoard($boardData);
-
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -70,6 +34,9 @@ $outputBoard = generateTileBoard($boardData);
 </head>
 <body>
     <h1>Tile Board</h1>
-    <?php echo $outputBoard; ?>
+    <?php
+    echo $message;
+    echo $outputBoard;
+    ?>
 </body>
 </html>
