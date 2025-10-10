@@ -30,7 +30,7 @@ function getMensajesMarkup($arrayMensajes) {
     return $output;
 }
 
-function getArrowsMarkup($arrows) {
+function getFormMarkup($arrows) {
     if (empty($arrows)) return '';
 
     $output = '';
@@ -69,13 +69,13 @@ function leerInput() {
     return ['row' => $row, 'col' => $col];
 }
 
-function processRedirect() {
+/*function processRedirect() {
     if (!isset($_GET['row']) || !isset($_GET['col'])) {
         header('HTTP/1.1 308 Permanent Redirect');
         header('Location: ./index.php?row=0&col=0');
         exit();
     }
-}
+}*/
 
 function getMensajes(&$posPersonaje) {
     if (!isset($posPersonaje)) {
