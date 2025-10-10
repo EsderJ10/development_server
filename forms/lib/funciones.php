@@ -37,8 +37,8 @@ function getFormMarkup($arrows) {
     foreach ($arrows as $sentido => $arrayPos) {
         $output .= '
             <form action="'. $_SERVER['PHP_SELF'] . '" method="post">
-            <input type="hidden" name="col" value="' . intval($arrayPos['col']) . '">
-            <input type="hidden" name="row" value="' . intval($arrayPos['row']) . '">
+            <input type="hidden" name="col" value="' . $arrayPos['col'] . '">
+            <input type="hidden" name="row" value="' . $arrayPos['row'] . '">
             <button type="submit">' . htmlspecialchars($sentido) . '</button>
             </form>';
     }

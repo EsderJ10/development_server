@@ -1,7 +1,5 @@
 <?php
 
-
-
 /* Zona de declaración de funciones */
 //*******Funciones de debugueo****
 function dump($var){
@@ -33,7 +31,6 @@ function getMensajesMarkup($arrayMensajes){
     
 }
 function getArrowsMarkup($arrows){
-    
     $output = '';
     if(isset($arrows)){
         foreach($arrows as $sentido => $arrayPos){
@@ -63,8 +60,7 @@ function leerArchivoCSV($rutaArchivoCSV) {
 
     return $tablero;
 }
-function leerInput(){
-    
+function leerInput(){    
     $col = filter_input(INPUT_GET, 'col', FILTER_VALIDATE_INT);
     $row = filter_input(INPUT_GET, 'row', FILTER_VALIDATE_INT);
 
