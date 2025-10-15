@@ -19,5 +19,5 @@ $tableroMarkup = getTableroMarkup($tablero, $posPersonaje);
 $mensajesUsuarioMarkup = getMensajesMarkup($mensajes);
 $formMarkup = getFormMarkup($arrows);
 
-include_once('./templates/index.tpl.php')
+include_once('./templates/index.tpl.php');
 ?>
