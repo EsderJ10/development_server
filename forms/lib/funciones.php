@@ -30,15 +30,15 @@ function getMensajesMarkup($arrayMensajes) {
     return $output;
 }
 
-function getArrowsMarkup($arrows) {
+function getFormMarkup($arrows) {
     if (empty($arrows)) return '';
 
     $output = '';
     foreach ($arrows as $sentido => $arrayPos) {
         $output .= '
             <form action="'. $_SERVER['PHP_SELF'] . '" method="post">
-            <input type="hidden" name="col" value="' . intval($arrayPos['col']) . '">
-            <input type="hidden" name="row" value="' . intval($arrayPos['row']) . '">
+            <input type="hidden" name="col" value="' . $arrayPos['col'] . '">
+            <input type="hidden" name="row" value="' . $arrayPos['row'] . '">
             <button type="submit">' . htmlspecialchars($sentido) . '</button>
             </form>';
     }
@@ -69,13 +69,13 @@ function leerInput() {
     return ['row' => $row, 'col' => $col];
 }
 
-function processRedirect() {
+/*function processRedirect() {
     if (!isset($_GET['row']) || !isset($_GET['col'])) {
         header('HTTP/1.1 308 Permanent Redirect');
         header('Location: ./index.php?row=0&col=0');
         exit();
     }
-}
+}*/
 
 function getMensajes(&$posPersonaje) {
     if (!isset($posPersonaje)) {
