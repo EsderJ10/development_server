@@ -1,0 +1,12 @@
+# This is a simple Docker Compose configuration file because the application does not require further more.
+services:
+  web:
+    build: .
+    
+    container_name: visits-count-dev
+    
+    # Map host port 8080 to container port 80
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
