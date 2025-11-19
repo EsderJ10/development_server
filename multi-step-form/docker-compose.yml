@@ -1,0 +1,17 @@
+# Docker Compose for multi-step form. Build the Dockerfile with the apache2 server in the same directory. 
+
+services:
+  web:
+    build: .
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html/
+    restart: always
+    container_name: multi-step-form-server
+    networks:
+      - multi-step-form-network
+
+networks:
+  multi-step-form-network:
+    driver: bridge
