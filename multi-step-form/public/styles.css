@@ -359,9 +359,8 @@ textarea {
     accent-color: var(--secondary);
 }
 
-.button-group {
+.buttons-container {
     display: flex;
-    gap: var(--spacing-md);
     margin-top: var(--spacing-lg);
     justify-content: space-between;
 }
@@ -622,7 +621,7 @@ input[type="reset"]:active {
         padding: var(--spacing-md);
     }
 
-    .button-group {
+    .button-container {
         flex-direction: column;
     }
 
@@ -709,4 +708,30 @@ input[type="reset"]:active {
 
 .custom-file-upload:active {
     background-color: rgba(79, 70, 229, 0.1);
+}
+
+.dynamic-select-wrapper {
+    margin-top: 20px;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.dynamic-select-wrapper.hidden {
+    display: none;
+}
+
+.dynamic-select-label {
+    color: #667eea;
+    font-weight: 600;
+}
+
+.dynamic-select-input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    margin-top: 8px;
+}
+
+.visually-hidden {
+    display: none;
 }

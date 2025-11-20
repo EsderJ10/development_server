@@ -8,6 +8,7 @@ session_start();
 
 // Initialize required classes
 require_once __DIR__ . '/src/Controllers/FormController.php';
+require_once __DIR__ . '/src/Helpers/ViewHelper.php';
 
 // Initialize session variables
 if (!isset($_SESSION['step'])) {

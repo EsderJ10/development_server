@@ -1,22 +1,9 @@
 <?php
-// Prepare data
 $summary = $controller->getPlanSummary();
 $plans = $summary['plans'];
 $selectedPlan = $summary['selectedPlan'];
 
-// Format data for display
-$profileImageUrl = 'uploads/' . htmlspecialchars($formData['profile_pic']);
-$userName = htmlspecialchars($formData['name']);
-$userEmail = htmlspecialchars($formData['email']);
-$userGender = htmlspecialchars(ucfirst($formData['gender']));
-$userMuscle = htmlspecialchars($muscles[$formData['main_muscle']]);
-$muscleNames = array_map(function($m) use ($muscles) { return $muscles[$m]; }, $formData['muscles']); 
-$allMuscles = htmlspecialchars(implode(', ', $muscleNames));
-$currentPerf = htmlspecialchars($formData['weight']) . ' kg x ' . htmlspecialchars($formData['reps']) . ' reps';
-$selectedPlanName = htmlspecialchars($selectedPlan['name']);
-$targetPerf = htmlspecialchars($selectedPlan['target_weight']) . ' kg x ' . htmlspecialchars($selectedPlan['target_reps']) . ' reps';
-$timelineWeeks = htmlspecialchars($selectedPlan['weeks']);
-$intensity = htmlspecialchars($selectedPlan['intensity']);
+$profileImageUrl = ViewHelper::getUploadedImageSrc($formData['profile_pic']);
 ?>
 
 <form method="POST">
@@ -26,21 +13,21 @@ $intensity = htmlspecialchars($selectedPlan['intensity']);
     
     <div class="profile-section">
         <img src="<?php echo $profileImageUrl; ?>" alt="Profile photo" class="profile-image">
-        <h3><?php echo $userName; ?></h3>
-        <p><?php echo $userEmail; ?></p>
+        <h3><?php echo htmlspecialchars($formData['name']); ?></h3>
+        <p><?php echo htmlspecialchars($formData['email']); ?></p>
     </div>
     
     <div class="summary-card">
         <h3 style="color: #667eea; margin-bottom: 15px;">Your Plan Summary</h3>
         
-        <?php $label = 'Sex'; $value = $userGender; include __DIR__ . '/components/summary-item.php'; ?>
-        <?php $label = 'Target muscles'; $value = $allMuscles; include __DIR__ . '/components/summary-item.php'; ?>
-        <?php $label = 'Main muscle'; $value = $userMuscle; include __DIR__ . '/components/summary-item.php'; ?>
-        <?php $label = 'Current performance'; $value = $currentPerf; include __DIR__ . '/components/summary-item.php'; ?>
-        <?php $label = 'Selected plan'; $value = $selectedPlanName; include __DIR__ . '/components/summary-item.php'; ?>
-        <?php $label = 'Target'; $value = $targetPerf; include __DIR__ . '/components/summary-item.php'; ?>
-        <?php $label = 'Timeline'; $value = $timelineWeeks . ' weeks'; include __DIR__ . '/components/summary-item.php'; ?>
-        <?php $label = 'Intensity'; $value = $intensity; include __DIR__ . '/components/summary-item.php'; ?>
+        <?php ViewHelper::renderSummaryItem('Sex', ucfirst(htmlspecialchars($formData['gender']))); ?>
+        <?php ViewHelper::renderSummaryItem('Target muscles', ViewHelper::formatMuscleList($muscles, $formData['muscles'])); ?>
+        <?php ViewHelper::renderSummaryItem('Main muscle', htmlspecialchars($muscles[$formData['main_muscle']])); ?>
+        <?php ViewHelper::renderSummaryItem('Current performance', ViewHelper::formatStats($formData['weight'], $formData['reps'])); ?>
+        <?php ViewHelper::renderSummaryItem('Selected plan', htmlspecialchars($selectedPlan['name'])); ?>
+        <?php ViewHelper::renderSummaryItem('Target', ViewHelper::formatTargetStats($selectedPlan['target_weight'], $selectedPlan['target_reps'])); ?>
+        <?php ViewHelper::renderSummaryItem('Timeline', htmlspecialchars($selectedPlan['weeks']) . ' weeks'); ?>
+        <?php ViewHelper::renderSummaryItem('Intensity', htmlspecialchars($selectedPlan['intensity'])); ?>
     </div>
     
     <div class="success" style="margin-top: 20px;">

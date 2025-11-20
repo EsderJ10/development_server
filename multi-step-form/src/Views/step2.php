@@ -2,26 +2,25 @@
     <h2 class="step-title">Muscle Group</h2>
     <div class="form-group">
         <p>Select the muscle group(s) you want to improve:</p>
-        <div class="checkbox-group">
-            <?php foreach ($muscles as $value => $label): ?>
-                <label class="checkbox-option">
-                    <input type="checkbox" name="muscles[]" value="<?php echo htmlspecialchars($value); ?>"
-                        <?php echo (isset($formData['muscles']) && is_array($formData['muscles']) && in_array($value, $formData['muscles'])) ? 'checked' : ''; ?>
-                        onchange="updateMainTargetOptions()">
-                    <?php echo htmlspecialchars($label); ?>
-                </label>
-            <?php endforeach; ?>
-        </div>
+        <?php
+            ViewHelper::renderCheckboxGroup(
+                'muscles',
+                $muscles,
+                $formData['muscles'] ?? [],
+                'updateMainTargetOptions()'
+            );
+        ?>
     </div>
 
-    <div class="form-group" id="main-target-section" style="display: none; margin-top: 20px; animation: fadeIn 0.3s ease-in;">
-        <p style="color: #667eea; font-weight: 600;">Which one is your main priority?</p>
-        <select name="main_muscle" id="main_muscle_select" class="form-control" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-top: 8px;">
-            <!-- Options populated by JS -->
-        </select>
-    </div>
-
-    <?php $showPrevious = true; $nextButtonText = 'Next →'; include __DIR__ . '/components/form-buttons.php'; ?>
+    <?php
+        ViewHelper::renderDynamicSelect(
+            'main-target-section',
+            'Which one is your main priority?',
+            'main_muscle',
+            'main_muscle_select'
+        );
+        ViewHelper::renderButtons(true, 'Next →'); 
+    ?>
 </form>
 
 <script>
@@ -39,7 +38,7 @@
         select.innerHTML = '';
         
         if (checkboxes.length > 1) {
-            mainTargetSection.style.display = 'block';
+            mainTargetSection.classList.remove('hidden');
             let foundSelected = false;
             
             checkboxes.forEach(cb => {
@@ -58,7 +57,7 @@
                 select.options[0].selected = true;
             }
         } else {
-            mainTargetSection.style.display = 'none';
+            mainTargetSection.classList.add('hidden');
         }
     }
 

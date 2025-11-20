@@ -21,7 +21,7 @@
                 <?php include $viewFile; ?>
             </div>
             
-            <?php include __DIR__ . '/components/error-sidebar.php'; ?>
+            <?php ViewHelper::renderErrorSidebar($errors ?? []); ?>
         </div>
     </div>
     

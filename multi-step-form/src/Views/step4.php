@@ -12,8 +12,8 @@ $muscles = $controller->getMuscles();
 <form method="POST">
     <h2 class="step-title">Select Your Plan</h2>
     <?php foreach ($plans as $index => $plan): ?>
-        <?php include __DIR__ . '/components/plan-card.php'; ?>
+        <?php ViewHelper::renderPlanCard($plan, $index, $selectedPlan, $muscles); ?>
     <?php endforeach; ?>
 
-    <?php $showPrevious = true; $nextButtonText = 'Next →'; include __DIR__ . '/components/form-buttons.php'; ?>
+    <?php ViewHelper::renderButtons(true, 'Next →'); ?>
 </form>

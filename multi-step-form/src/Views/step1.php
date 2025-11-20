@@ -3,12 +3,13 @@
     <div class="form-group">
         <label>Biological Sex:</label>
         <?php
-            $options = ['male' => 'Male', 'female' => 'Female'];
-            $name = 'gender';
-            $selected = $formData['gender'] ?? null;
-            include __DIR__ . '/components/radio-group.php';
+            ViewHelper::renderRadioGroup(
+                'gender',
+                ['male' => 'Male', 'female' => 'Female'],
+                $formData['gender'] ?? null
+            );
         ?>
     </div>
 
-    <?php $showPrevious = false; $nextButtonText = 'Next →'; include __DIR__ . '/components/form-buttons.php'; ?>
+    <?php ViewHelper::renderButtons(false, 'Next →'); ?>
 </form>
