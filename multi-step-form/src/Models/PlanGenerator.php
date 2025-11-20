@@ -16,7 +16,8 @@ class PlanGenerator
             'target_weight' => round($weight + $increment_conservative, 1),
             'target_reps' => $repetitions + 2,
             'weeks' => 12,
-            'intensity' => 'Low-Medium'
+            'intensity' => 'Low-Medium',
+            'muscle' => $muscle
         ];
 
         $plans[] = [
@@ -25,7 +26,8 @@ class PlanGenerator
             'target_weight' => round($weight + $increment_moderate, 1),
             'target_reps' => $repetitions + 4,
             'weeks' => 8,
-            'intensity' => 'Medium-High'
+            'intensity' => 'Medium-High',
+            'muscle' => $muscle
         ];
 
         $plans[] = [
@@ -34,7 +36,8 @@ class PlanGenerator
             'target_weight' => round($weight + $increment_aggressive, 1),
             'target_reps' => $repetitions + 5,
             'weeks' => 6,
-            'intensity' => 'High'
+            'intensity' => 'High',
+            'muscle' => $muscle
         ];
 
         return $plans;

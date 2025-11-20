@@ -6,6 +6,7 @@ $plans = $controller->generatePlans(
     $formData['reps']
 );
 $selectedPlan = $formData['plan'] ?? null;
+$muscles = $controller->getMuscles();
 ?>
 
 <form method="POST">
