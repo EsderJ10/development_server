@@ -23,7 +23,7 @@ class FormValidator
                 break;
             case 5:
                 $this->validatePersonalInfo($data);
-                $this->validateProfilePhoto($files);
+                $this->validateProfilePhoto($files, $data);
                 break;
         }
 
@@ -81,9 +81,12 @@ class FormValidator
         }
     }
 
-    private function validateProfilePhoto($files)
+    private function validateProfilePhoto($files, $data = [])
     {
         if (empty($files['profile_pic']['name'])) {
+            if (!empty($data['profile_pic_existing'])) {
+                return;
+            }
             $this->errors[] = "Please upload a profile photo";
             return;
         }
@@ -96,8 +99,8 @@ class FormValidator
             $this->errors[] = "Only .jpg, .jpeg or .png files are allowed";
         }
 
-        if ($file['size'] > 5000000) {
-            $this->errors[] = "File is too large (maximum 5MB)";
+        if ($file['size'] > 2000000) {
+            $this->errors[] = "File is too large (maximum 2MB)";
         }
 
         if ($file['error'] !== 0) {

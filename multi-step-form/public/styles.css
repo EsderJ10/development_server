@@ -582,6 +582,15 @@ input[type="reset"]:active {
     font-weight: 500;
 }
 
+.closing-message {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    color: white;
+    text-align: center;
+}
+
 
 @media (max-width: 1024px) {
     .main-wrapper {

@@ -52,6 +52,11 @@ class FormController
 
     private function handleNext()
     {
+        // Prevent advancing past the final step (Step 7)
+        if ($_SESSION['step'] >= 7) {
+            return;
+        }
+
         $isValid = $this->validator->validateStep(
             $_SESSION['step'],
             $_POST,
@@ -92,13 +97,25 @@ class FormController
                 $_SESSION['form_data']['name'] = htmlspecialchars($_POST['name']);
                 $_SESSION['form_data']['email'] = htmlspecialchars($_POST['email']);
                 
-                $filename = $this->uploader->upload($_FILES['profile_pic']);
-                if ($filename) {
-                    $_SESSION['form_data']['profile_pic'] = $filename;
-                } else {
-                    // Add uploader error to validator errors
-                    if ($this->uploader->hasError()) {
-                        $this->validator->addError($this->uploader->getError());
+                if (!empty($_FILES['profile_pic']['name'])) {
+                    // Upload as temporary file
+                    $filename = $this->uploader->upload($_FILES['profile_pic'], true);
+                    if ($filename) {
+                        $_SESSION['form_data']['profile_pic'] = $filename;
+                    } else {
+                        // Add uploader error to validator errors
+                        if ($this->uploader->hasError()) {
+                            $this->validator->addError($this->uploader->getError());
+                        }
+                    }
+                }
+                break;
+            case 6:
+                // Finalize upload on confirmation
+                if (isset($_SESSION['form_data']['profile_pic'])) {
+                    $finalName = $this->uploader->finalizeUpload($_SESSION['form_data']['profile_pic']);
+                    if ($finalName) {
+                        $_SESSION['form_data']['profile_pic'] = $finalName;
                     }
                 }
                 break;
@@ -143,6 +160,11 @@ class FormController
     public function isFieldChecked($fieldName, $value)
     {
         return isset($_SESSION['form_data'][$fieldName]) && $_SESSION['form_data'][$fieldName] == $value;
+    }
+
+    public function getTempImage($filename)
+    {
+        return $this->uploader->getTempFileContent($filename);
     }
 
     public function getPlanSummary()

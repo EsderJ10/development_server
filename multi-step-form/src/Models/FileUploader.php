@@ -2,11 +2,12 @@
 
 class FileUploader
 {
-    private $uploadDir = 'uploads';
+    private $uploadDir;
     private $error = '';
 
     public function __construct()
     {
+        $this->uploadDir = dirname(__DIR__, 2) . '/uploads';
         $this->ensureUploadDirectory();
     }
 
@@ -27,7 +28,7 @@ class FileUploader
         return true;
     }
 
-    public function upload($file)
+    public function upload($file, $isTemp = false)
     {
         // Check if upload directory is ready
         if (!$this->ensureUploadDirectory()) {
@@ -39,16 +40,74 @@ class FileUploader
             return false;
         }
 
-        $file_ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-        $new_filename = uniqid('profile_', true) . '.' . $file_ext;
-        $destination = $this->uploadDir . '/' . $new_filename;
+        // Validate MIME type
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mime_type = $finfo->file($file['tmp_name']);
+        
+        $allowed_mimes = [
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png'
+        ];
+
+        if (!array_key_exists($mime_type, $allowed_mimes)) {
+            $this->error = "Invalid file type. Only JPG and PNG images are allowed.";
+            return false;
+        }
+
+        $file_ext = $allowed_mimes[$mime_type];
+        
+        if ($isTemp) {
+            // Use system temp directory for temporary storage
+            $tempDir = sys_get_temp_dir();
+            $new_filename = uniqid('temp_profile_', true) . '.' . $file_ext;
+            $destination = $tempDir . DIRECTORY_SEPARATOR . $new_filename;
+        } else {
+            $new_filename = uniqid('profile_', true) . '.' . $file_ext;
+            $destination = $this->uploadDir . '/' . $new_filename;
+        }
 
         if (move_uploaded_file($file['tmp_name'], $destination)) {
             $this->error = '';
             return $new_filename;
         }
 
-        $this->error = "Failed to move uploaded file. Please check directory permissions.";
+        $this->error = "Failed to move uploaded file.";
+        return false;
+    }
+
+    public function finalizeUpload($tempFilename)
+    {
+        if (strpos($tempFilename, 'temp_') !== 0) {
+            return $tempFilename; // Already finalized or invalid
+        }
+
+        $tempDir = sys_get_temp_dir();
+        $source = $tempDir . DIRECTORY_SEPARATOR . $tempFilename;
+        
+        // Create final filename
+        $finalFilename = str_replace('temp_', '', $tempFilename);
+        $destination = $this->uploadDir . '/' . $finalFilename;
+
+        if (file_exists($source)) {
+            if (rename($source, $destination)) {
+                return $finalFilename;
+            } else {
+                $this->error = "Failed to finalize upload.";
+                return false;
+            }
+        }
+        
+        $this->error = "Temporary file not found.";
+        return false;
+    }
+
+    public function getTempFileContent($filename)
+    {
+        $tempDir = sys_get_temp_dir();
+        $path = $tempDir . DIRECTORY_SEPARATOR . $filename;
+        if (file_exists($path)) {
+            return file_get_contents($path);
+        }
         return false;
     }
 
