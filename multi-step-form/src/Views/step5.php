@@ -26,13 +26,5 @@
         );
     ?>
 
-    <script>
-        // This script is only used to show the selected file name
-        document.getElementById('profile_pic').addEventListener('change', function(e) {
-            var fileName = e.target.files[0].name;
-            document.getElementById('file-name-display').textContent = 'Selected: ' + fileName;
-        });
-    </script>
-
     <?php ViewHelper::renderButtons(true, 'Finish'); ?>
 </form>

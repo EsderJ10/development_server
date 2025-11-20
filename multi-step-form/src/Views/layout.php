@@ -25,22 +25,6 @@
         </div>
     </div>
     
-    <script>
-        // Card interactions
-        document.querySelectorAll('.plan-card').forEach(card => {
-            card.addEventListener('click', function() {
-                document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
-                this.classList.add('selected');
-                this.querySelector('input[type="radio"]').checked = true;
-            });
-        });
-        
-        // Radio interactions
-        document.querySelectorAll('.radio-option').forEach(option => {
-            option.addEventListener('click', function() {
-                this.querySelector('input[type="radio"]').checked = true;
-            });
-        });
-    </script>
+    <script src="../../public/script.js"></script>
 </body>
 </html>

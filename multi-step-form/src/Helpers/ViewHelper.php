@@ -35,7 +35,7 @@ class ViewHelper
         foreach ($options as $value => $label) {
             $checked = ($selectedValue === $value) ? 'checked' : '';
             echo '<label class="radio-option ' . $checked . '">';
-            echo '<input type="radio" name="' . htmlspecialchars($name) . '" value="' . htmlspecialchars($value) . '" ' . $checked . ' onclick="this.parentElement.parentElement.querySelectorAll(\'.radio-option\').forEach(el => el.classList.remove(\'checked\')); this.parentElement.classList.add(\'checked\');">';
+            echo '<input type="radio" name="' . htmlspecialchars($name) . '" value="' . htmlspecialchars($value) . '" ' . $checked . '>';
             echo '<span>' . htmlspecialchars($label) . '</span>';
             echo '</label>';
         }
@@ -48,18 +48,16 @@ class ViewHelper
      * @param string $name The name attribute for the checkbox inputs
      * @param array $options Associative array of value => label
      * @param array $selectedValues Array of currently selected values
-     * @param string $onChange Optional JavaScript onchange handler
      */
-    public static function renderCheckboxGroup($name, $options, $selectedValues, $onChange = '')
+    public static function renderCheckboxGroup($name, $options, $selectedValues)
     {
         echo '<div class="checkbox-group">';
         foreach ($options as $value => $label) {
             $isChecked = (is_array($selectedValues) && in_array($value, $selectedValues));
             $checkedStr = $isChecked ? 'checked' : '';
-            $onChangeAttr = $onChange ? 'onchange="' . htmlspecialchars($onChange) . '"' : '';
             
             echo '<label class="checkbox-option">';
-            echo '<input type="checkbox" name="' . htmlspecialchars($name) . '[]" value="' . htmlspecialchars($value) . '" ' . $checkedStr . ' ' . $onChangeAttr . '>';
+            echo '<input type="checkbox" name="' . htmlspecialchars($name) . '[]" value="' . htmlspecialchars($value) . '" ' . $checkedStr . '>';
             echo htmlspecialchars($label);
             echo '</label>';
         }
@@ -177,16 +175,17 @@ class ViewHelper
     /**
      * Renders a hidden select container to be populated by JavaScript.
      * 
-     * @param string $name The name attribute of the select input
-     * @param string $selectId The ID of the select input
-     * @param string $containerId The ID of the wrapper div (used by JS to show/hide)
+     * @param string $wrapperId The ID of the wrapper div (used by JS to show/hide)
      * @param string $label The text label above the select
+     * @param string $selectName The name attribute of the select input
+     * @param string $selectId The ID of the select input
+     * @param string $selectedValue The currently selected value (optional)
      */
-    public static function renderDynamicSelect($wrapperId, $label, $selectName, $selectId)
+    public static function renderDynamicSelect($wrapperId, $label, $selectName, $selectId, $selectedValue = '')
     {
         echo '<div class="form-group dynamic-select-wrapper hidden" id="' . htmlspecialchars($wrapperId) . '">';
         echo '<p class="dynamic-select-label">' . htmlspecialchars($label) . '</p>';
-        echo '<select name="' . htmlspecialchars($selectName) . '" id="' . htmlspecialchars($selectId) . '" class="form-control dynamic-select-input">';
+        echo '<select name="' . htmlspecialchars($selectName) . '" id="' . htmlspecialchars($selectId) . '" class="form-control dynamic-select-input" data-initial-value="' . htmlspecialchars($selectedValue) . '">';
         echo '<!-- Options populated by JS -->';
         echo '</select>';
         echo '</div>';
