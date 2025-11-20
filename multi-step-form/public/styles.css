@@ -735,3 +735,44 @@ input[type="reset"]:active {
 .visually-hidden {
     display: none;
 }
+
+.github-tab {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    z-index: 99;
+}
+
+.github-tab a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 8px;
+    background: #fff;
+    color: #8898aa;
+    text-decoration: none;
+    font-family: sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border: 1px solid #eee;
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    box-shadow: -2px 2px 10px rgba(0,0,0,0.05);
+    transition: 0.3s;
+}
+
+.github-tab svg {
+    transform: rotate(90deg); 
+}
+
+.github-tab a:hover {
+    background: #667eea;
+    color: white;
+    padding-right: 15px;
+    border-color: #667eea;
+}
