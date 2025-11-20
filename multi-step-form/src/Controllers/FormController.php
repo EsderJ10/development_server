@@ -84,7 +84,16 @@ class FormController
                 $_SESSION['form_data']['gender'] = $_POST['gender'];
                 break;
             case 2:
-                $_SESSION['form_data']['muscle'] = $_POST['muscle'];
+                $_SESSION['form_data']['muscles'] = $_POST['muscles'] ?? [];
+                
+                // Determine main muscle
+                if (count($_SESSION['form_data']['muscles']) > 1) {
+                    $_SESSION['form_data']['main_muscle'] = $_POST['main_muscle'] ?? $_SESSION['form_data']['muscles'][0];
+                } elseif (count($_SESSION['form_data']['muscles']) === 1) {
+                    $_SESSION['form_data']['main_muscle'] = $_SESSION['form_data']['muscles'][0];
+                } else {
+                    $_SESSION['form_data']['main_muscle'] = null;
+                }
                 break;
             case 3:
                 $_SESSION['form_data']['weight'] = $_POST['weight'];
@@ -150,7 +159,7 @@ class FormController
     public function getSelectedPlan($planIndex)
     {
         $plans = $this->generatePlans(
-            $_SESSION['form_data']['muscle'],
+            $_SESSION['form_data']['main_muscle'],
             $_SESSION['form_data']['weight'],
             $_SESSION['form_data']['reps']
         );
@@ -171,7 +180,7 @@ class FormController
     {
         return [
             'plans' => $this->generatePlans(
-                $_SESSION['form_data']['muscle'],
+                $_SESSION['form_data']['main_muscle'],
                 $_SESSION['form_data']['weight'],
                 $_SESSION['form_data']['reps']
             ),

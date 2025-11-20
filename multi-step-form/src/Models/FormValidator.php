@@ -39,8 +39,17 @@ class FormValidator
 
     private function validateMuscle($data)
     {
-        if (empty($data['muscle'])) {
+        if (empty($data['muscles']) || !is_array($data['muscles'])) {
             $this->errors[] = "Please select at least one muscle group";
+            return;
+        }
+
+        if (count($data['muscles']) > 1) {
+            if (empty($data['main_muscle'])) {
+                $this->errors[] = "Please select your main target muscle";
+            } elseif (!in_array($data['main_muscle'], $data['muscles'])) {
+                $this->errors[] = "Main target must be one of the selected muscles";
+            }
         }
     }
 

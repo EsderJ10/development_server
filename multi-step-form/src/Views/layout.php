@@ -10,9 +10,9 @@
     <div class="container">
         <div class="header">
             <h1>Performance Improvement Plan</h1>
-            <p>Step <?php echo $step; ?> of 6</p>
+            <p>Step <?php echo $step; ?> of <?php echo TOTAL_STEPS; ?></p>
             <div class="progress-bar">
-                <div class="progress-fill" style="width: <?php echo ($step / 6) * 100; ?>%"></div>
+                <div class="progress-fill" style="width: <?php echo ($step / TOTAL_STEPS) * 100; ?>%"></div>
             </div>
         </div>
         

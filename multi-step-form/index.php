@@ -1,8 +1,9 @@
 <?php
 
+/* Configuration and initialization */
 // Enable output buffering to prevent header errors
+define('TOTAL_STEPS', 7);
 ob_start();
-
 session_start();
 
 // Initialize required classes

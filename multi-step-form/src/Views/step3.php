@@ -1,7 +1,7 @@
 <form method="POST" enctype="multipart/form-data">
     <h2 class="step-title">Current Performance</h2>
     <p style="color: #666;">
-        Indicate your current performance in <?php echo htmlspecialchars($muscles[$formData['muscle']]); ?>
+        Indicate your current performance in <?php echo htmlspecialchars($muscles[$formData['main_muscle']]); ?>
     </p>
     <div class="input-row">
         <div class="form-group">

@@ -1,7 +1,7 @@
 <?php
 // Move plan generation to controller
 $plans = $controller->generatePlans(
-    $formData['muscle'],
+    $formData['main_muscle'],
     $formData['weight'],
     $formData['reps']
 );

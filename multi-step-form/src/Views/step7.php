@@ -9,7 +9,9 @@ $profileImageUrl = 'uploads/' . htmlspecialchars($formData['profile_pic']);
 $userName = htmlspecialchars($formData['name']);
 $userEmail = htmlspecialchars($formData['email']);
 $userGender = htmlspecialchars(ucfirst($formData['gender']));
-$userMuscle = htmlspecialchars($muscles[$formData['muscle']]);
+$userMuscle = htmlspecialchars($muscles[$formData['main_muscle']]);
+$muscleNames = array_map(function($m) use ($muscles) { return $muscles[$m]; }, $formData['muscles']); 
+$allMuscles = htmlspecialchars(implode(', ', $muscleNames));
 $currentPerf = htmlspecialchars($formData['weight']) . ' kg x ' . htmlspecialchars($formData['reps']) . ' reps';
 $selectedPlanName = htmlspecialchars($selectedPlan['name']);
 $targetPerf = htmlspecialchars($selectedPlan['target_weight']) . ' kg x ' . htmlspecialchars($selectedPlan['target_reps']) . ' reps';
@@ -32,7 +34,8 @@ $intensity = htmlspecialchars($selectedPlan['intensity']);
         <h3 style="color: #667eea; margin-bottom: 15px;">Your Plan Summary</h3>
         
         <?php $label = 'Sex'; $value = $userGender; include __DIR__ . '/components/summary-item.php'; ?>
-        <?php $label = 'Target muscle'; $value = $userMuscle; include __DIR__ . '/components/summary-item.php'; ?>
+        <?php $label = 'Target muscles'; $value = $allMuscles; include __DIR__ . '/components/summary-item.php'; ?>
+        <?php $label = 'Main muscle'; $value = $userMuscle; include __DIR__ . '/components/summary-item.php'; ?>
         <?php $label = 'Current performance'; $value = $currentPerf; include __DIR__ . '/components/summary-item.php'; ?>
         <?php $label = 'Selected plan'; $value = $selectedPlanName; include __DIR__ . '/components/summary-item.php'; ?>
         <?php $label = 'Target'; $value = $targetPerf; include __DIR__ . '/components/summary-item.php'; ?>

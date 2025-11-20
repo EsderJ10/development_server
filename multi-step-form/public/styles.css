@@ -553,6 +553,11 @@ input[type="reset"]:active {
     }
 }
 
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 .summary-section {
     margin-bottom: var(--spacing-lg);
     padding-bottom: var(--spacing-lg);

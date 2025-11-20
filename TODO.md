@@ -5,5 +5,5 @@
 - [x] Add a confirmation step before submission.
 - [x] Clarify visually that the profile photo was uploaded or not.
 - [x] Add target muscle to plans
-- [ ] Let select multiple muscles for plans.
-- [ ] Select a muscle as main target muscle for plans with multiple muscles.
+- [x] Let select multiple muscles for plans.
+- [x] Select a muscle as main target muscle for plans with multiple muscles.

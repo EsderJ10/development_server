@@ -46,8 +46,14 @@ $selectedPlan = $controller->getSelectedPlan($formData['plan']);
         include __DIR__ . '/components/summary-item.php'; 
         ?>
         <?php 
-        $label = 'Target Muscle'; 
-        $value = htmlspecialchars($muscles[$formData['muscle']]); 
+        $label = 'Target Muscles'; 
+        $muscleNames = array_map(function($m) use ($muscles) { return $muscles[$m]; }, $formData['muscles']);
+        $value = htmlspecialchars(implode(', ', $muscleNames));
+        include __DIR__ . '/components/summary-item.php'; 
+        ?>
+        <?php 
+        $label = 'Main Muscle'; 
+        $value = htmlspecialchars($muscles[$formData['main_muscle']]); 
         include __DIR__ . '/components/summary-item.php'; 
         ?>
         <?php 
