@@ -7,4 +7,4 @@
 - [x] Add target muscle to plans
 - [x] Let select multiple muscles for plans.
 - [x] Select a muscle as main target muscle for plans with multiple muscles.
-- [ ] Clean logic pollution in *.php files (Views).
+- [x] Clean logic pollution in *.php files (Views).
