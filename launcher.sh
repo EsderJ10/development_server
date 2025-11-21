@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# ==============================================================================
-# Supercharged Docker Launcher
-# ==============================================================================
-
 set -u
 
 # --- Configuration & Styling ---
@@ -24,8 +20,8 @@ APPS["1,Dir"]="multi-step-form"
 APPS["1,Port"]="8080"
 
 APPS["2,Name"]="Visits Counter"
-APPS["2,Dir"]="visits-counter"
-APPS["2,Port"]="8081"
+APPS["2,Dir"]="visits-count"
+APPS["2,Port"]="8080"
 
 # Detect Docker Compose Version
 if docker compose version >/dev/null 2>&1; then
@@ -49,7 +45,7 @@ cleanup_exit() {
 }
 trap cleanup_exit SIGINT
 
-# Check if Docker Daemon is actually running
+# Check if Docker Daemon is actually running (Windows Users)
 check_docker_daemon() {
     if ! docker info > /dev/null 2>&1; then
         log_error "Docker Desktop is not running!"
@@ -65,12 +61,13 @@ show_spinner() {
     tput civis # Hide cursor
     while kill -0 "$pid" 2>/dev/null; do
         local temp=${spinstr#?}
-        printf " [%c]  " "$spinstr"
+        printf "[%c]  " "$spinstr"
         local spinstr=$temp${spinstr%"$temp"}
         sleep $delay
         printf "\b\b\b\b\b\b"
     done
     printf "    \b\b\b\b"
+    echo ""
     tput cnorm # Restore cursor
 }
 
@@ -79,7 +76,7 @@ wait_for_health() {
     local max_retries=30
     local count=0
 
-    echo -n "  Waiting for app to boot... "
+    echo -en "${BOLD}[*] Waiting for app to boot... ${RESET}"
     
     # Loop until the URL returns an HTTP status or we timeout
     while ! curl -s "http://localhost:$port" > /dev/null; do
@@ -100,16 +97,15 @@ launch_app() {
     local dir=$2
     local port=$3
 
-    echo -e "\n${BOLD}🚀 Launching: $app_name${RESET}"
+    echo -e "\n${BOLD}Launching: $app_name${RESET}"
     echo "------------------------------------------------"
 
-    # 1. Directory Check
     if [[ ! -d "$dir" ]]; then
         log_error "Directory './$dir' not found."
         return
     fi
 
-    # 2. Port Conflict Logic
+    # Handle port conflict asking the user
     local conflict
     conflict=$(docker ps --format "{{.Names}}\t{{.Ports}}" | grep -E ":$port->" | awk '{print $1}' | head -n 1)
     
@@ -123,13 +119,12 @@ launch_app() {
         fi
     fi
 
-    # 3. Docker Compose Up
     cd "$dir" || return
     log_info "Building containers..."
     $COMPOSE_CMD up -d --build >/dev/null 2>&1 &
     show_spinner $!
 
-    # 4. Health Check
+    # Health check
     if [ $? -eq 0 ]; then
         wait_for_health "$port"
         echo ""
@@ -150,7 +145,7 @@ launch_app() {
 }
 
 cleanup_resources() {
-    echo -e "\n${BOLD}🧹 Cleaning up resources...${RESET}"
+    echo -e "\n${BOLD}Cleaning up resources...${RESET}"
     # Iterate over registered apps and try to down them
     for key in "${!APPS[@]}"; do
         if [[ $key == *"Dir"* ]]; then
@@ -174,12 +169,12 @@ check_docker_daemon
 while true; do
     clear
     echo -e "${MAGENTA}"
-    echo "   Docker App Launcher v2.0"
+    echo "======= DWES Launcher - Docker Containers ======="
     echo -e "${RESET}"
     
-    echo "1) Multi-step Form   ${GRAY}(Port 8080)${RESET}"
-    echo "2) Visits Counter    ${GRAY}(Port 8081)${RESET}"
-    echo "3) Stop All & Clean  ${GRAY}(Remove Containers)${RESET}"
+    echo -e "1) Multi-step Form   ${GRAY}(Port 8080)${RESET}"
+    echo -e "2) Visits Counter    ${GRAY}(Port 8080)${RESET}"
+    echo -e "3) Stop All & Clean  ${GRAY}(Remove Containers)${RESET}"
     echo "4) Quit"
     echo ""
     read -p "Select an option: " choice
@@ -192,6 +187,7 @@ while true; do
         *) log_error "Invalid option." ;;
     esac
     
+    echo "------------------------------------------------"
     echo ""
     read -p "Press [Enter] to return to menu..."
 done
