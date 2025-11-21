@@ -1,87 +1,197 @@
 #!/bin/bash
 
-# Function to display loading spinner while the docker container is building
-show_loading_spinner() {
-    local pid=$!
-    local spin='-\|/'
-    local i=0
-    echo -n 'Building container, please wait... '
+# ==============================================================================
+# Supercharged Docker Launcher
+# ==============================================================================
+
+set -u
+
+# --- Configuration & Styling ---
+BOLD="\e[1m"
+RESET="\e[0m"
+RED="\e[31m"
+GREEN="\e[32m"
+YELLOW="\e[33m"
+BLUE="\e[34m"
+CYAN="\e[36m"
+MAGENTA="\e[35m"
+GRAY="\e[90m"
+
+# App Definitions (Name | Folder | Port)
+declare -A APPS
+APPS["1,Name"]="Multi-step Form"
+APPS["1,Dir"]="multi-step-form"
+APPS["1,Port"]="8080"
+
+APPS["2,Name"]="Visits Counter"
+APPS["2,Dir"]="visits-counter"
+APPS["2,Port"]="8081"
+
+# Detect Docker Compose Version
+if docker compose version >/dev/null 2>&1; then
+    COMPOSE_CMD="docker compose"
+else
+    COMPOSE_CMD="docker-compose"
+fi
+
+# --- Helper Functions ---
+
+log_info() { echo -e "${BLUE}ℹ ${RESET} $1"; }
+log_success() { echo -e "${GREEN}✔ ${RESET} $1"; }
+log_warn() { echo -e "${YELLOW}⚠ ${RESET} $1"; }
+log_error() { echo -e "${RED}✖ $1${RESET}"; }
+
+# Restore cursor if script is interrupted (Ctrl+C)
+cleanup_exit() {
+    tput cnorm
+    echo -e "\n${GRAY}Script interrupted. Exiting.${RESET}"
+    exit 1
+}
+trap cleanup_exit SIGINT
+
+# Check if Docker Daemon is actually running
+check_docker_daemon() {
+    if ! docker info > /dev/null 2>&1; then
+        log_error "Docker Desktop is not running!"
+        log_info "Please start Docker and try again."
+        exit 1
+    fi
+}
+
+show_spinner() {
+    local pid=$1
+    local delay=0.1
+    local spinstr='|/-\'
+    tput civis # Hide cursor
     while kill -0 "$pid" 2>/dev/null; do
-        printf "\b${spin:i++%${#spin}:1}"
-        sleep .1
+        local temp=${spinstr#?}
+        printf " [%c]  " "$spinstr"
+        local spinstr=$temp${spinstr%"$temp"}
+        sleep $delay
+        printf "\b\b\b\b\b\b"
     done
-    echo -e "\bDone!"
+    printf "    \b\b\b\b"
+    tput cnorm # Restore cursor
 }
 
-# Function to check if a Docker container is running on a specific port
-check_port_conflict() {
-    target_port=$1
-    container_name=$(docker ps --filter "expose=$target_port" --format "{{.Names}}")
-    if [ -n "$container_name" ]; then
-        echo -e "\e[31mError: There is already a container running on port $target_port: $container_name\e[0m"
-        return 1  # Indicates a conflict
-    else
-        return 0  # No conflict
+wait_for_health() {
+    local port=$1
+    local max_retries=30
+    local count=0
+
+    echo -n "  Waiting for app to boot... "
+    
+    # Loop until the URL returns an HTTP status or we timeout
+    while ! curl -s "http://localhost:$port" > /dev/null; do
+        if [ $count -ge $max_retries ]; then
+            echo ""
+            log_warn "App is taking a long time to start."
+            return 1
+        fi
+        count=$((count+1))
+        sleep 1
+    done
+    echo -e "${GREEN}Ready!${RESET}"
+    return 0
+}
+
+launch_app() {
+    local app_name=$1
+    local dir=$2
+    local port=$3
+
+    echo -e "\n${BOLD}🚀 Launching: $app_name${RESET}"
+    echo "------------------------------------------------"
+
+    # 1. Directory Check
+    if [[ ! -d "$dir" ]]; then
+        log_error "Directory './$dir' not found."
+        return
     fi
-}
 
-# Function to stop a running container
-stop_container() {
-    container_name=$1
-    echo -e "\e[33mStopping container $container_name...\e[0m"
-    docker stop "$container_name" && echo -e "\e[32mContainer $container_name stopped successfully!\e[0m"
-}
-
-# Function to check if a Docker container is running
-check_container_status() {
-    container_name=$1
-    if docker ps -q -f name="$container_name" > /dev/null; then
-        echo -e "\e[32mThe container is running!\e[0m"
-        container_port=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$container_name")
-        echo -e "\e[34mYou can access the app at http://$container_port\e[0m"
-    else
-        echo -e "\e[31mError: The container is not running.\e[0m"
-    fi
-}
-
-run_docker_compose() {
-    app_name=$1
-    directory=$2
-    target_port=$3
-    echo -e "\e[36mLaunching $app_name...\e[0m"
-
-    # Check for port conflict before proceeding
-    if check_port_conflict "$target_port"; then
-        read -p "Do you want to stop the existing container on port $target_port and continue? (y/n): " choice
-        if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
-            stop_container "$container_name"
+    # 2. Port Conflict Logic
+    local conflict
+    conflict=$(docker ps --format "{{.Names}}\t{{.Ports}}" | grep -E ":$port->" | awk '{print $1}' | head -n 1)
+    
+    if [[ -n "$conflict" ]]; then
+        log_warn "Port $port occupied by container: ${MAGENTA}$conflict${RESET}"
+        read -p "$(echo -e "${CYAN}? Stop existing container? (y/N): ${RESET}")" choice
+        if [[ "$choice" =~ ^[Yy]$ ]]; then
+            docker stop "$conflict" >/dev/null 2>&1 && log_success "Stopped $conflict"
         else
-            echo -e "\e[31mExiting script without launching the container.\e[0m"
-            exit 1
+            log_error "Cannot proceed with port conflict."; return
         fi
     fi
 
-    cd "$directory" || { echo -e "\e[31mError: Could not find the $app_name directory.\e[0m"; exit 1; }
-    docker-compose up -d & show_loading_spinner
-    container_name=$(docker-compose ps -q)
-    check_container_status "$container_name"
+    # 3. Docker Compose Up
+    cd "$dir" || return
+    log_info "Building containers..."
+    $COMPOSE_CMD up -d --build >/dev/null 2>&1 &
+    show_spinner $!
+
+    # 4. Health Check
+    if [ $? -eq 0 ]; then
+        wait_for_health "$port"
+        echo ""
+        log_success "Successfully deployed!"
+        echo -e "   ${BOLD}➜ Access here:${RESET} ${BLUE}http://localhost:$port${RESET}"
+        
+        # Log viewing option
+        read -p "$(echo -e "\n${GRAY}? View logs now? (y/N): ${RESET}")" log_choice
+        if [[ "$log_choice" =~ ^[Yy]$ ]]; then
+             $COMPOSE_CMD logs -f
+        fi
+    else
+        log_error "Docker Compose failed."
+    fi
+    
+    # Return to root for next operation
+    cd ..
 }
 
-# Ask the user and check choice
-echo -e "\n\e[1mWhich app would you like to launch?\e[0m"
-echo "1) multi-step-form (Port 8080)"
-echo "2) visits-counter (Port 8080)"
-read -p "Enter the number corresponding to the app (1 or 2): " app_choice
+cleanup_resources() {
+    echo -e "\n${BOLD}🧹 Cleaning up resources...${RESET}"
+    # Iterate over registered apps and try to down them
+    for key in "${!APPS[@]}"; do
+        if [[ $key == *"Dir"* ]]; then
+            dir=${APPS[$key]}
+            if [[ -d "$dir" ]]; then
+                cd "$dir" || continue
+                echo -n "  Stopping $dir... "
+                $COMPOSE_CMD down >/dev/null 2>&1
+                echo -e "${GREEN}Done${RESET}"
+                cd ..
+            fi
+        fi
+    done
+    log_success "All apps stopped and networks removed."
+}
 
-case "$app_choice" in
-    1)
-        run_docker_compose "multi-step-form" "multi-step-form" "8080"
-        ;;
-    2)
-        run_docker_compose "visits-counter" "visits-count" "8080"
-        ;;
-    *)
-        echo -e "\e[31mInvalid option. Please select 1 or 2.\e[0m"
-        exit 1
-        ;;
-esac
+# --- Main Loop ---
+
+check_docker_daemon
+
+while true; do
+    clear
+    echo -e "${MAGENTA}"
+    echo "   Docker App Launcher v2.0"
+    echo -e "${RESET}"
+    
+    echo "1) Multi-step Form   ${GRAY}(Port 8080)${RESET}"
+    echo "2) Visits Counter    ${GRAY}(Port 8081)${RESET}"
+    echo "3) Stop All & Clean  ${GRAY}(Remove Containers)${RESET}"
+    echo "4) Quit"
+    echo ""
+    read -p "Select an option: " choice
+
+    case $choice in
+        1) launch_app "${APPS["1,Name"]}" "${APPS["1,Dir"]}" "${APPS["1,Port"]}" ;;
+        2) launch_app "${APPS["2,Name"]}" "${APPS["2,Dir"]}" "${APPS["2,Port"]}" ;;
+        3) cleanup_resources ;;
+        4) log_info "Goodbye!"; exit 0 ;;
+        *) log_error "Invalid option." ;;
+    esac
+    
+    echo ""
+    read -p "Press [Enter] to return to menu..."
+done
